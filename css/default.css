@@ -1,0 +1,30 @@
+div.trainingBox {
+	/*
+	border: 1px solid #04C;
+	margin: 0em;
+	*/
+	border: 1px solid #DDD;
+	width: 90%;
+	}
+
+table.training {
+	text-align: left;
+	margin: 1em;
+	border: 0 none !important;
+	}
+
+table.training tr {
+	border: 0 none;
+	}
+
+table.training th {
+	padding: 10px 2px 1px 1px;
+	text-decoration: underline;
+	/*font-size: 110%;*/
+	border: 0 none;
+	}
+
+table.training td {
+	padding: 1px 2px 1px 30px;
+	border: 0 none;
+	}
