@@ -27,38 +27,34 @@ echo '</h3>';
 
 echo "<div class=\"trainingBox\">";
 
-echo "<table class=\"training\">";
+echo "<dl class=\"training\">";
 
 // trainer
-echo "<tr><th colspan=\"2\">Trainer:</th></tr>";
-echo "<tr><td colspan=\"2\">";
+echo "<dt>Trainer</dt>";
+
+//echo "Trainer<pre>";print_r($trainer);echo "</pre>";
 foreach ($trainer as $curTrainer)
 {
-	unset($trainerContact);
-	echo "<b>{$curTrainer->name}</b>";
-	
-	$trainerContact = array();
-		if($curTrainer->emailSichtbar AND $curTrainer->email_to != '') $trainerContact[] = JHtml::_('email.cloak', $curTrainer->email_to);
-		if($curTrainer->handySichtbar AND $curTrainer->mobile != '') $trainerContact[] = $curTrainer->mobile;
-		if($curTrainer->telefonSichtbar AND $curTrainer->telephone != '') $trainerContact[] = $curTrainer->telephone;
-	if(count($trainerContact) > 0) echo "<br />( ".implode(', ', $trainerContact)." )";
-	echo "<br />";
+	echo "<dd>";
+	if(isset($curTrainer->name)) echo '<span class="trainerName">'.$curTrainer->name.'</span>';
+	if(isset($curTrainer->contact)) echo " <br />( ".$curTrainer->contact." )";
+	echo "</dd>";
 }
-echo "</td></tr>";
 
 // dates
-echo "<tr><th colspan=\"2\">Trainingszeiten:</th></tr>";
+echo '<dt class="times">Trainingszeiten</dt>';
 foreach ($trainings as $training) 
 {
-	echo "<tr><td>{$training->tag}</td><td> ".substr($training->beginn,0,5)." - ".substr($training->ende,0,5)." Uhr";
+	echo '<dd><span class="weekday">'.$training->tag.'</span> ';
+	echo $training->beginn." - ".$training->ende." Uhr";
 	if ($training->bemerkung != "") echo " (".$training->bemerkung.")";
 	
 	if ($showHomeGym == '1' OR $training->hallenNummer != 7014 )
 	{
 		echo " (".$training->name.")";
 	}
-	echo "</td></tr>";
+	echo "</dd>";
 }
 
-echo "</table>";
+echo "</dl>";
 echo "</div>";
