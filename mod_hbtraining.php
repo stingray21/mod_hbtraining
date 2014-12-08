@@ -3,7 +3,7 @@
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
 //This is the parameter we get from our xml file above
-$headline = $params->get('headline');
+$headlineOption = $params->get('headline');
 $showHomeGym = $params->get('showhomegym');
 
 // get parameter from component menu item
@@ -13,11 +13,15 @@ if ($menuitemid)
 	$menu = JFactory::getApplication()->getMenu();
 	$menuparams = $menu->getParams( $menuitemid );
 }
-$teamkey = $menuparams->get('teamkey');
-$teamkey = strtolower($teamkey);
+$teamkey = strtolower($menuparams->get('teamkey'));
 
 // Include the syndicate functions only once
 require_once dirname(__FILE__).'/helper.php';
+
+$team = modHbTrainingHelper::getTeam($teamkey);
+$trainings = modHbTrainingHelper::getTrainings($teamkey);
+$trainer = modHbTrainingHelper::getTrainer($teamkey);
+$headline = modHbTrainingHelper::getHeadline($headlineOption, $team);
 
 //Returns the path of the layout file
 require JModuleHelper::getLayoutPath('mod_hbtraining', $params->get('layout', 'default'));
