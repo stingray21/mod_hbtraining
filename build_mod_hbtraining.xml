@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="mod_hbtraining" default="all" basedir=".">
+	
+	<!-- name of extension without com_, mod_ etc. -->
+	<property name="NAME" value="hbtraining"/>
+	<!-- type of extension ("com", "mod", etc.) -->
+	<property name="EXTTYPE" value="mod"/>
+	
+		
+	<property name="LONGNAME" value="${EXTTYPE}_${NAME}"/>
+	
+	
+	<target name="all" depends="build,sync,package"/>
+	
+	<target name="package">
+		<antcall target="_package" />
+	</target>
+	
+	<target name="build">
+		<antcall target="buildmodule">
+			<param name="PREFIX" value=""/>
+		</antcall>
+	</target>
+
+	<target name="sync">
+		<antcall target="_sync" />
+	</target>
+	
+	<property environment="env"/>
+	<property name="source" value="${env.SOURCEDIR}\handball\hb_joomla3"/>
+	<property name="release" value="${env.RELEASEDIR}\${LONGNAME}\Releases"/>
+	<property name="builddir" value="${env.BUILDDIR}"/>
+	<property name="verbose" value="false"/>
+
+	<tstamp>
+		<format property="NOW" pattern="yyyyMMdd_HHmmss"/>
+	</tstamp>
+
+	<condition property="version" value="${NOW}_r${dist.revision}" else="${NOW}">
+		<isset property="dist.revision"/>
+	</condition>
+
+	<target name="_clean">
+		<delete dir="${builddir}/${LONGNAME}" verbose="{$verbose}"/>
+	</target>
+
+	<target name="_sync">
+		<sync todir="${LONGNAME}" includeemptydirs="true">
+			<fileset dir="${builddir}/${LONGNAME}"/>
+			<preserveintarget>
+				<include name="**/.svn/**"/>
+				<include name="**/.git/**"/>
+			</preserveintarget>
+		</sync>
+	</target>
+
+	<target name="_package">
+		<zip destfile="${release}/${LONGNAME}_${version}.zip" basedir="${LONGNAME}">
+			<exclude name=".svn"/>
+			<exclude name=".git"/>
+		</zip>
+	</target>
+
+	<target name="buildplugin" depends="_clean">
+		<copy todir="${builddir}/${LONGNAME}" overwrite="true" verbose="${verbose}" failonerror="false">
+			<fileset dir="${source}/plugins/${PREFIX}">
+				<include name="*${LONGNAME}*"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="buildmodule" depends="_clean">
+		<copy todir="${builddir}/${LONGNAME}" overwrite="true" verbose="${verbose}" failonerror="false">
+				<fileset dir="${source}/${PREFIX}/modules/${LONGNAME}"/>
+		</copy>
+		<copy todir="${builddir}/${LONGNAME}/media" overwrite="true" verbose="${verbose}"  failonerror="false">
+				<fileset dir="${source}/media/${LONGNAME}"/>
+		</copy>
+		<copy todir="${builddir}/${LONGNAME}/language" overwrite="true" verbose="${verbose}"  failonerror="false" flatten="true">
+				<fileset dir="${source}/${PREFIX}/language">
+						<include name="*/*${LONGNAME}.ini" />
+				</fileset>
+		</copy>
+	</target>
+	
+	<target name="buildtemplate" depends="_clean">
+		<copy todir="${builddir}/${LONGNAME}" overwrite="true" verbose="${verbose}" failonerror="false">
+			<fileset dir="${source}/${PREFIX}/templates/${LONGNAME}"/>
+		</copy>
+	</target>
+	
+	<target name="buildcomponent" depends="_clean">
+		
+		<mkdir dir="${builddir}/${LONGNAME}/site"/>
+		<mkdir dir="${builddir}/${LONGNAME}/site/language"/>
+		<mkdir dir="${builddir}/${LONGNAME}/admin"/>
+		<mkdir dir="${builddir}/${LONGNAME}/admin/sql"/>
+		<mkdir dir="${builddir}/${LONGNAME}/admin/language"/>
+		<mkdir dir="${builddir}/${LONGNAME}/admin/"/>
+		<mkdir dir="${builddir}/${LONGNAME}/media"/>
+		
+		<copy todir="${builddir}/${LONGNAME}/media" overwrite="true" verbose="${verbose}" failonerror="false">
+			<fileset dir="${source}/media/${LONGNAME}"/>
+		</copy>
+		<copy todir="${builddir}/${LONGNAME}/admin" overwrite="true" verbose="${verbose}">
+			<fileset dir="${source}/administrator/components/${LONGNAME}"/>
+		</copy>
+		<copy todir="${builddir}/${LONGNAME}/admin/language" overwrite="true" verbose="${verbose}" flatten="true">
+			<fileset dir="${source}/administrator/language">
+				<exclude name="overrides/*"/>
+				<exclude name="pdf_fonts/*"/>
+				<include name="**/*${LONGNAME}*.ini"/>
+			</fileset>
+		</copy>
+		<copy todir="${builddir}/${LONGNAME}/site" overwrite="true" verbose="${verbose}">
+			<fileset dir="${source}/components/${LONGNAME}"/>
+		</copy>
+		<copy todir="${builddir}/${NAME}/language/site" overwrite="true" verbose="${verbose}" flatten="true">
+			<fileset dir="${source}/language">
+				<exclude name="overrides/*"/>
+				<exclude name="pdf_fonts/*"/>
+				<include name="**/*${LONGNAME}*.ini" />
+			</fileset>
+		</copy>
+		
+		<move file="${builddir}/${LONGNAME}/admin/${NAME}.xml" todir="${builddir}/${LONGNAME}" verbose="${verbose}"/>
+
+	</target>
+
+</project>
