@@ -108,7 +108,6 @@ class modHbTrainingHelper
 		$query->select('*');
 		$query->from($db->qn('hb_mannschaft_trainer'));
 		$query->where('kuerzel = '.$db->q($teamkey));
-		$query->leftJoin('hb_trainer USING (trainerID)');
 		$query->leftJoin('#__contact_details USING (alias)');
 		$query->order('IF(ISNULL(`rangfolge`),1,0),`rangfolge` DESC');
 		$db->setQuery($query);
@@ -119,7 +118,7 @@ class modHbTrainingHelper
 		return $trainer;
 	}
 	
-	protected function addContact($trainer) 
+	protected static function addContact($trainer) 
 	{
 		$global_show = modHbTrainingHelper::getGlobalContactSettings();
 		foreach ($trainer as $coach)
@@ -132,29 +131,36 @@ class modHbTrainingHelper
 		return $trainer;
 	}
 	
-	protected function getShowSettings($trainer, $global) 
+	protected static function getShowSettings($trainer, $global) 
 	{
-		$par=$trainer->params;
-		$params = new JRegistry;
-		$params->loadString($par);
+		$params = new JRegistry();
+		if ($trainer && isset($trainer->params)) {
+			//echo __FUNCTION__.':<pre>';print_r($trainer->params);echo'</pre>';
+			$params->loadString($trainer->params);
+		}
 		//echo __FUNCTION__.':<pre>';print_r($params);echo'</pre>';
 		$items = array('email','mobile','telephone');
 		foreach ($items as $value)
 		{
 			$show[$value] = $params->get('show_'.$value);
-			//echo "show[".$value."]: ".$show[$value]."<br>";
+			//echo "show[".$value."]: ".$show[$value]."(".gettype($show[$value]).")<br>";
 			if ($show[$value] === null) {
+				//echo "global[".$value."]:".$global[$value]."<br>";
 				$show[$value] = $global[$value];
 			}
-			if ($show[$value] === 0) {
-				$trainer->{$value} = null;
+			if ($show[$value] == false) {
+				if ($value == 'email') {
+					$trainer->{$value.'_to'} = null;
+				} else {
+					$trainer->{$value} = null;
+				}
 			}
 		}
 		//echo __FUNCTION__.':<pre>';print_r($trainer);echo'</pre>';
 		return $trainer;
 	}
 	
-	protected function getContact($trainer) 
+	protected static function getContact($trainer) 
 	{
 		//echo __FUNCTION__.':<pre>';print_r($trainer);echo'</pre>';
 		$trainerContact = array();
@@ -162,13 +168,13 @@ class modHbTrainingHelper
 			$trainerContact[] = JHtml::_('email.cloak', $trainer->email_to);
 		}
 		if($trainer->mobile != null) {
-			$trainer->mobile = preg_replace('/(\+49)(1\d\d)(\d{6,9})/', 
-					'$1 $2 / $3', $trainer->mobile);
+			//$trainer->mobile = preg_replace('/(\+49)(1\d\d)(\d{6,9})/', '$1 $2 / $3', $trainer->mobile);
+			$trainer->mobile = preg_replace('/(\+49)(1\d\d)(\d{6,9})/', '0$2 / $3', $trainer->mobile);
 			$trainerContact[] = $trainer->mobile;
 		}
 		if($trainer->telephone != null) {
-			$trainer->telephone = preg_replace('/(\+49)(\d{4})(\d{3,9})/', 
-					'$1 $2 / $3', $trainer->telephone);
+			//$trainer->telephone = preg_replace('/(\+49)(\d{4})(\d{3,9})/', '$1 $2 / $3', $trainer->telephone);
+			$trainer->telephone = preg_replace('/(\+49)(\d{4})(\d{3,9})/', '0$2 / $3', $trainer->telephone);
 			$trainerContact[] = $trainer->telephone;
 		}
 		if(count($trainerContact) > 0) {

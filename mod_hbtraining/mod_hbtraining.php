@@ -14,7 +14,7 @@ if ($menuitemid)
 	$menuparams = $menu->getParams( $menuitemid );
 }
 $teamkey = strtolower($menuparams->get('teamkey'));
-
+$homeGym = trim(strtolower($menuparams->get('homegym')));
 // Include the syndicate functions only once
 require_once dirname(__FILE__).'/helper.php';
 

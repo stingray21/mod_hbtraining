@@ -1,28 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="mod_hbtraining" default="all" basedir=".">
+<project name="build_joomla_ext" default="all" basedir=".">
 	
-	<!-- name of extension without com_, mod_ etc. -->
-	<property name="NAME" value="hbtraining"/>
-	<!-- type of extension ("com", "mod", etc.) -->
-	<property name="EXTTYPE" value="mod"/>
-	
+	<loadproperties srcFile="build.properties">
+	<filterchain>
+        <linecontains>
+			<contains value="project."/>
+        </linecontains>
+      </filterchain>
+	</loadproperties>
+	<property name="LONGNAME" value="${project.type}_${project.name}"/>
+	<property name="NAME" value="${project.name}"/>	
+	<property name="EXTTYPE" value="${project.type}"/>
 		
-	<property name="LONGNAME" value="${EXTTYPE}_${NAME}"/>
-	
-	
-	<target name="all" depends="build,sync,package"/>
+	<target name="all" depends="build.revision,build,injectVersion,sync,package"/>
 	
 	<target name="package">
 		<antcall target="_package" />
 	</target>
 	
 	<target name="build">
-		<antcall target="buildmodule">
+		<antcall target="build${EXTTYPE}">
 			<param name="PREFIX" value=""/>
 		</antcall>
 	</target>
 
-	<target name="sync">
+	<target name="sync" depends="">
 		<antcall target="_sync" />
 	</target>
 	
@@ -34,6 +36,10 @@
 
 	<tstamp>
 		<format property="NOW" pattern="yyyyMMdd_HHmmss"/>
+	</tstamp>
+	
+	<tstamp>
+		<format property="build.date" pattern="yyyy-MM-dd"/>
 	</tstamp>
 
 	<condition property="version" value="${NOW}_r${dist.revision}" else="${NOW}">
@@ -61,7 +67,8 @@
 		</zip>
 	</target>
 
-	<target name="buildplugin" depends="_clean">
+	<!-- build plugin -->
+	<target name="buildplg" depends="_clean">
 		<copy todir="${builddir}/${LONGNAME}" overwrite="true" verbose="${verbose}" failonerror="false">
 			<fileset dir="${source}/plugins/${PREFIX}">
 				<include name="*${LONGNAME}*"/>
@@ -69,7 +76,8 @@
 		</copy>
 	</target>
 	
-	<target name="buildmodule" depends="_clean">
+	<!-- build module -->
+	<target name="buildmod" depends="_clean">
 		<copy todir="${builddir}/${LONGNAME}" overwrite="true" verbose="${verbose}" failonerror="false">
 				<fileset dir="${source}/${PREFIX}/modules/${LONGNAME}"/>
 		</copy>
@@ -83,12 +91,14 @@
 		</copy>
 	</target>
 	
-	<target name="buildtemplate" depends="_clean">
+	<!-- build template -->
+	<target name="buildtpl" depends="_clean">
 		<copy todir="${builddir}/${LONGNAME}" overwrite="true" verbose="${verbose}" failonerror="false">
 			<fileset dir="${source}/${PREFIX}/templates/${LONGNAME}"/>
 		</copy>
 	</target>
 	
+	<!-- build component -->
 	<target name="buildcomponent" depends="_clean">
 		
 		<mkdir dir="${builddir}/${LONGNAME}/site"/>
@@ -125,6 +135,35 @@
 		
 		<move file="${builddir}/${LONGNAME}/admin/${NAME}.xml" todir="${builddir}/${LONGNAME}" verbose="${verbose}"/>
 
+	</target>
+	
+	<target name="build.major">
+		<propertyfile file="build.properties">
+			<entry key="build.major.number" type="int" operation="+" value="1" pattern="0" />
+			<entry key="build.minor.number" type="int" value="0" pattern="0" />
+			<entry key="build.revision.number" type="int" value="0" pattern="0" />
+			</propertyfile>
+	</target>
+	
+	<target name="build.minor">
+		<propertyfile file="build.properties">
+			<entry key="build.minor.number" type="int" operation="+" value="1" pattern="0" />
+			<entry key="build.revision.number" type="int" value="0" pattern="0" />
+			</propertyfile>
+	</target>
+	
+	<target name="build.revision">
+		<propertyfile file="build.properties">
+			<entry key="build.revision.number" type="int" operation="+" value="1" pattern="0" />
+		</propertyfile>
+	</target>
+	
+	<target name="injectVersion">
+		<property file="build.properties"/>
+		<echo>Build Date: ${build.date}</echo>
+		<replaceregexp file="${builddir}/${LONGNAME}/${LONGNAME}.xml" match="@@@date@@@" replace="${build.date}" />
+		<echo>Build Number: ${build.major.number}.${build.minor.number}.${build.revision.number}</echo> 
+		<replaceregexp file="${builddir}/${LONGNAME}/${LONGNAME}.xml" match="@@@version@@@" replace="${build.major.number}.${build.minor.number}.${build.revision.number}" />
 	</target>
 
 </project>

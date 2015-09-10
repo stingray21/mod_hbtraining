@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE PUBLIC>
-<extension type="module" version="2.5.0" client="site" method="install">
+<extension type="module" version="2.5.0" client="site" method="upgrade">
 	<!-- Name of the Module -->
 	<name>HB Training</name> 
 	<!-- Name of the Author -->
 	<author>Jochen Stehle</author> 
 	<!-- Version Date of the Module -->
-	<creationDate>27.02.2013</creationDate> 
+	<creationDate>2015-09-09</creationDate> 
 	<!-- Copyright information -->
 	<copyright>All rights reserved by Jochen Stehle</copyright> 
 	<!-- License Information -->
@@ -16,7 +16,7 @@
 	<!-- Author's website -->
 	<authorUrl></authorUrl> 
 	<!-- Module version number -->
-	<version>1.0.0</version> 
+	<version>1.0.8</version> 
 	<!-- Description of what the module does -->
 	<description>Provides the training information of a team</description>
 	<!-- Listing of all files that should be installed for the module to function -->
@@ -25,12 +25,14 @@
 		<filename module="mod_hbtraining">mod_hbtraining.php</filename>
 		<filename>index.html</filename>
 		<filename>helper.php</filename>
-		<filename>tmpl/default.php</filename>
-		<filename>tmpl/index.html</filename>
-		<filename>css/default.css</filename>
-		<filename>css/index.html</filename>
+		<folder>tmpl</folder>
 	</files>
-
+	
+	<media destination="mod_hbtraining" folder="media">
+		<filename>index.html</filename>
+		<folder>css</folder>
+	</media>
+	
 	<languages>
 		<!-- Any language files included with the module -->
 		<language tag="de-DE">language/de-DE.mod_hbtraining.ini</language>
@@ -63,6 +65,13 @@
 						<option value="title">MODHBTRAINING_HEADLINE_TITLE</option>
 						<option value="titleandteam">MODHBTRAINING_HEADLINE_TITLEANDTEAM</option>
 						<option value="not">MODHBTRAINING_HEADLINE_NOT</option>
+				</field>
+				<field 
+					name="homegym" 
+					type="text" 
+					default="" 
+					label="LABEL_MODHBTRAINING_HOMEGYM" 
+					description="DESC_MODHBTRAINING_HOMEGYM">
 				</field>
 				<field 
 					name="showhomegym" 
