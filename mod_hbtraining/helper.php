@@ -67,10 +67,10 @@ class modHbTrainingHelper
 		$query = $db->getQuery(true);
 		$query->select('*, DATE_FORMAT(beginn, \'%H:%i\') as beginn,'.
 			'DATE_FORMAT(ende, \'%H:%i\') as ende');
-		$query->from($db->qn('hb_mannschaft_training'));
+		$query->from($db->qn('hb_training'));
 		$query->where($db->qn('kuerzel').' = '.$db->q($teamkey));
-		$query->leftJoin('hb_training USING ('.$db->qn('trainingID').')');
 		$query->leftJoin('hb_halle USING (hallenNr)');
+		//echo "Trainings<pre>".$query."</pre>";
 		$db->setQuery($query);
 		$trainings = $db->loadObjectList ();
 		//echo "Trainings<pre>"; print_r($trainings); echo "</pre>";

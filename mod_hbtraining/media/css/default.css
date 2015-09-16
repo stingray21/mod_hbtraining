@@ -1,0 +1,55 @@
+div.hbtraining dt {
+  margin-top: 0.5em;
+  margin-left: 1em;
+}
+
+div.hbtraining dd {
+  margin-left: 1.5em;
+}
+
+span.tr-name {
+  display: inline-block;
+  min-width: 12em;
+}
+
+span.tr-contact:before {
+  content: "| ";
+  color: #999;
+}
+
+span.tr-contact {
+  color: #999;
+  
+}
+
+dd.trainer:hover span {
+  color: #333;
+
+}
+
+span.tr-date {
+  display: inline-block;
+  min-width: 12em;
+}
+
+span.tr-day {
+  display: inline-block;
+  min-width: 2em;
+}
+
+span.tr-start {
+  display: inline-block;
+  min-width: 3em;
+}
+
+span.tr-end {
+  display: inline-block;
+  min-width: 3em;
+}
+
+span.tr-gym:before {
+  content: "| ";
+  color: #999;
+}
+
+

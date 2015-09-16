@@ -9,18 +9,18 @@ JHtml::stylesheet('mod_hbtraining/default.css', array(), true);
 
 <?php echo (!empty($headline)) ? '<h3>'.$headline.'</h3>' : ''; ?>
 
-<div>
+<div class="hbtraining">
 	<dl>
 	<?php 
 	if (!empty($trainer)) { 
-		echo '<dt>'.JText::_('MOD_HBTRAINING_COACH').'</dt>';
+		echo '<dt class="trainer">'.JText::_('MOD_HBTRAINING_COACH').'</dt>';
 		//echo __FILE__.'('.__LINE__.'):<pre>';print_r($trainer);echo'</pre>'; 
 		foreach ($trainer as $curTrainer)
 		{
 			?>
-				<dd><?php 
-					echo (isset($curTrainer->name)) ? $curTrainer->name : '';
-					echo (isset($curTrainer->contact)) ? " (&nbsp;".$curTrainer->contact."&nbsp;)" : '';
+				<dd class="trainer"><?php 
+					echo (isset($curTrainer->name)) ? ' <span class="tr-name">'.$curTrainer->name.'</span>' : '';
+					echo (isset($curTrainer->contact)) ? ' <span class="tr-contact">'.$curTrainer->contact.'</span>' : '';
 					?></dd>
 			<?php
 		}
@@ -29,15 +29,22 @@ JHtml::stylesheet('mod_hbtraining/default.css', array(), true);
 				
 	<?php
 	if (!empty($trainings)) { 
-		echo '<dt>'.JText::_('MOD_HBTRAINING_TRAINING').'</dt>';
+		echo '<dt class="training">'.JText::_('MOD_HBTRAINING_TRAINING').'</dt>';
 		//echo __FILE__.'('.__LINE__.'):<pre>';print_r($trainings);echo'</pre>';
 		foreach ($trainings as $training) 
 		{	
 			?>
-				<dd><?php 
-				echo $training->tag.' '.$training->beginn." - ".$training->ende." Uhr";
+				<dd class="training"><?php 
+				echo '<span class="tr-date"><span class="tr-day">'.$training->tag.'</span> ';
+				echo '<span class="tr-start">'.$training->beginn.'</span> ';
+				echo ' - ';
+				echo '<span class="tr-end">'.$training->ende.'</span> Uhr</span>';
 				echo ($training->bemerkung != "") ? " (".$training->bemerkung.")" : '';
-				echo ($showHomeGym == '1' OR $training->hallenNr != $homeGym ) ? " (".$training->hallenName.")" : '';
+				if ($training->hallenNr != '') {
+					if ( $showHomeGym == '1' OR $training->hallenNr != $homeGym ) {
+						echo ' <span class="tr-gym">'.$training->hallenName.'</span>' ;
+					}
+				}
 				?></dd>
 			<?php
 		}
