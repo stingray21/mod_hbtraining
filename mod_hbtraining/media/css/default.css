@@ -9,7 +9,7 @@ div.hbtraining dd {
 
 span.tr-name {
   display: inline-block;
-  min-width: 12em;
+  //min-width: 12em;
 }
 
 span.tr-contact:before {

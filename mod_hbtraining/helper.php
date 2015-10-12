@@ -70,6 +70,7 @@ class modHbTrainingHelper
 		$query->from($db->qn('hb_training'));
 		$query->where($db->qn('kuerzel').' = '.$db->q($teamkey));
 		$query->leftJoin('hb_halle USING (hallenNr)');
+		$query->order("FIELD(tag, 'MO', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So')");
 		//echo "Trainings<pre>".$query."</pre>";
 		$db->setQuery($query);
 		$trainings = $db->loadObjectList ();
