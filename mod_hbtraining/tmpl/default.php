@@ -11,6 +11,16 @@ JHtml::stylesheet('mod_hbtraining/default.css', array(), true);
 
 <div class="hbtraining">
 	<dl>
+	
+	<?php 
+	if (!empty($emailAlias)) { 
+		echo '<dt class="trainer">'.JText::_('MOD_HBTRAINING_EMAIL').'</dt>';
+		//echo __FILE__.'('.__LINE__.'):<pre>';print_r($trainer);echo'</pre>'; 
+				?><dd class="email"><?php echo $emailAlias; ?></dd>
+			<?php
+	}
+	?>
+		
 	<?php 
 	if (!empty($trainer)) { 
 		echo '<dt class="trainer">'.JText::_('MOD_HBTRAINING_COACH').'</dt>';

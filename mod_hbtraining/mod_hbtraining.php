@@ -18,6 +18,7 @@ $homeGym = trim(strtolower($menuparams->get('homegym')));
 // Include the syndicate functions only once
 require_once dirname(__FILE__).'/helper.php';
 
+$emailAlias = modHbTrainingHelper::getEmailAlias($teamkey);
 $team = modHbTrainingHelper::getTeam($teamkey);
 $trainings = modHbTrainingHelper::getTrainings($teamkey);
 $trainer = modHbTrainingHelper::getTrainer($teamkey);

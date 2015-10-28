@@ -78,7 +78,7 @@ class modHbTrainingHelper
 		return $trainings;
 	}
     
-	public static function getGlobalContactSettings()
+	public static function getGlobalShowSettings()
 	{
 		// getting global contact settings
 		$db = JFactory::getDBO();
@@ -112,76 +112,140 @@ class modHbTrainingHelper
 		$query->leftJoin('#__contact_details USING (alias)');
 		$query->order('IF(ISNULL(`rangfolge`),1,0),`rangfolge` DESC');
 		$db->setQuery($query);
-		$trainer = $db->loadObjectList ();
-		//echo __FUNCTION__.':<pre>';print_r($trainer);echo'</pre>';
-		$trainer = self::addContact($trainer);
-		//echo __FUNCTION__.':<pre>';print_r($trainer);echo'</pre>';
-		return $trainer;
+		$coaches = $db->loadObjectList ();
+		//echo __FUNCTION__.':<pre>';print_r($coaches);echo'</pre>';
+		$coaches = self::addContact($coaches);
+		//echo __FUNCTION__.':<pre>';print_r($coaches);echo'</pre>';
+		return $coaches;
 	}
 	
-	protected static function addContact($trainer) 
+	protected static function addContact($coaches) 
 	{
-		$global_show = modHbTrainingHelper::getGlobalContactSettings();
-		foreach ($trainer as $coach)
+		//echo __FILE__.' ('.__LINE__.')<pre>';print_r($coaches);echo'</pre>';
+		$global_show = self::getGlobalShowSettings();		
+		foreach ($coaches as &$coach)
 		{
-			$coach = self::getShowSettings($coach, $global_show);
-			//echo __FUNCTION__.':<pre>';print_r($coach);echo'</pre>';
-			$coach->contact = self::getContact($coach);
+			$show = self::getShowSettings($coach, $global_show);
+			//echo __FUNCTION__.'<br>'.__FILE__.' ('.__LINE__.')<pre>';print_r($show);echo'</pre>';
+			$coach->contact = self::getContact($coach, $show);
 		}
-		//echo __FUNCTION__.':<pre>';print_r($trainer);echo'</pre>';
-		return $trainer;
+		//echo __FILE__.' ('.__LINE__.')<pre>';print_r($coaches);echo'</pre>';
+		return $coaches;
 	}
 	
-	protected static function getShowSettings($trainer, $global) 
+	
+	protected static function getShowSettings($coach, $global_show) 
 	{
-		$params = new JRegistry();
-		if ($trainer && isset($trainer->params)) {
-			//echo __FUNCTION__.':<pre>';print_r($trainer->params);echo'</pre>';
-			$params->loadString($trainer->params);
-		}
-		//echo __FUNCTION__.':<pre>';print_r($params);echo'</pre>';
+		$contact_show = self::getContactShowSettings($coach);
 		$items = array('email','mobile','telephone');
 		foreach ($items as $value)
 		{
-			$show[$value] = $params->get('show_'.$value);
-			//echo "show[".$value."]: ".$show[$value]."(".gettype($show[$value]).")<br>";
-			if ($show[$value] === null) {
+			if ($contact_show[$value] === null) {
 				//echo "global[".$value."]:".$global[$value]."<br>";
-				$show[$value] = $global[$value];
-			}
-			if ($show[$value] == false) {
-				if ($value == 'email') {
-					$trainer->{$value.'_to'} = null;
-				} else {
-					$trainer->{$value} = null;
-				}
+				$show[$value] = $global_show[$value];
+			} else {
+				$show[$value] = $contact_show[$value];
 			}
 		}
-		//echo __FUNCTION__.':<pre>';print_r($trainer);echo'</pre>';
-		return $trainer;
+		//echo __FUNCTION__.'<br>'.__FILE__.' ('.__LINE__.')<pre>';print_r($show);echo'</pre>';
+		return $show;
 	}
 	
-	protected static function getContact($trainer) 
+	protected static function getContactShowSettings($coach) 
 	{
-		//echo __FUNCTION__.':<pre>';print_r($trainer);echo'</pre>';
-		$trainerContact = array();
-		if($trainer->email_to != null) {
-			$trainerContact[] = JHtml::_('email.cloak', $trainer->email_to);
+		$params = new JRegistry();
+		if ($coach && isset($coach->params)) {
+			//echo __FUNCTION__.':<pre>';print_r($trainer->params);echo'</pre>';
+			$params->loadString($coach->params);
 		}
-		if($trainer->mobile != null) {
-			//$trainer->mobile = preg_replace('/(\+49)(1\d\d)(\d{6,9})/', '$1 $2 / $3', $trainer->mobile);
-			$trainer->mobile = preg_replace('/(\+49)(1\d\d)(\d{6,9})/', '0$2 / $3', $trainer->mobile);
-			$trainerContact[] = $trainer->mobile;
+		//echo __FUNCTION__.':<pre>';print_r($params);echo'</pre>';
+		
+		$contact_show['email'] = $params->get('show_email_to');
+		$contact_show['mobile'] = $params->get('show_mobile');
+		$contact_show['telephone'] = $params->get('show_telephone');		
+
+		//echo __FUNCTION__.'<br>'.__FILE__.' ('.__LINE__.')<pre>';print_r($contact_show);echo'</pre>';
+		return $contact_show;
+	}
+	
+	protected static function getContact($coach, $show) 
+	{
+		//echo __FUNCTION__.':<pre>';print_r($coach);echo'</pre>';
+		$contact = array();
+		$emailSettings = self::getEmailSettings();
+		if ($emailSettings === 'personal' && $coach->email_to != null && $show['email']) {
+			$contact[] = JHtml::_('email.cloak', $coach->email_to);
 		}
-		if($trainer->telephone != null) {
-			//$trainer->telephone = preg_replace('/(\+49)(\d{4})(\d{3,9})/', '$1 $2 / $3', $trainer->telephone);
-			$trainer->telephone = preg_replace('/(\+49)(\d{4})(\d{3,9})/', '0$2 / $3', $trainer->telephone);
-			$trainerContact[] = $trainer->telephone;
+		if($coach->mobile != null && $show['mobile']) {
+			//$coach->mobile = preg_replace('/(\+49)(1\d\d)(\d{6,9})/', '$1 $2 / $3', $coach->mobile);
+			$coach->mobile = preg_replace('/(\+49)(1\d\d)(\d{6,9})/', '0$2 / $3', $coach->mobile);
+			$contact[] = $coach->mobile;
 		}
-		if(count($trainerContact) > 0) {
-			return implode(', ', $trainerContact);
+		if($coach->telephone != null && $show['telephone']) {
+			//$coach->telephone = preg_replace('/(\+49)(\d{4})(\d{3,9})/', '$1 $2 / $3', $coach->telephone);
+			$coach->telephone = preg_replace('/(\+49)(\d{4})(\d{3,9})/', '0$2 / $3', $coach->telephone);
+			$contact[] = $coach->telephone;
+		}
+		if(count($contact) > 0) {
+			return implode(', ', $contact);
 		}
 		return null;
+	}
+	
+	protected static function getEmailSettings() {
+		
+		// SETTINGS FROM MENU ITEM (more important)
+		$menuitemid = JRequest::getInt('Itemid');
+		if ($menuitemid)
+		{
+			$menu = JFactory::getApplication()->getMenu();
+			$menuparams = $menu->getParams($menuitemid);
+			//echo __FILE__.' ('.__LINE__.')<pre>';print_r($menuparams); echo'</pre>';
+			$emailSettings = $menuparams->get('email');
+			//echo __FILE__.' ('.__LINE__.')<pre>';print_r($email_menu); echo'</pre>';
+		}
+		if ($emailSettings === 'component' || $emailSettings === null) {
+			// SETTINGS FROM COMPONENT
+			$params = JComponentHelper::getParams( 'com_hbteam' );
+			//echo __FILE__.' ('.__LINE__.')<pre>';print_r($params); echo'</pre>';
+			$emailSettings = $params->get( 'email' );
+			//echo __FILE__.' ('.__LINE__.')<pre>';print_r($email_com); echo'</pre>';
+		}
+		return $emailSettings;
+	}
+	
+	public static function getEmailAlias($teamkey) {
+		$emailAlias = null;
+		$emailSettings = self::getEmailSettings();
+		if ($emailSettings === 'alias') {
+			// getting email alias of the team
+			$db = JFactory::getDBO();
+			$query = $db->getQuery(true);
+			$query->select($db->qn('email'));
+			$query->from($db->qn('hb_mannschaft'));
+			$query->where($db->qn('kuerzel').' = '.$db->q($teamkey));
+			$db->setQuery($query);
+			$email = $db->loadResult();
+			//echo __FILE__.' ('.__LINE__.')<pre>';print_r($email);echo'</pre>';
+			$domain = self::getDomain();
+			if (!empty($email) && !empty($domain)){
+				$emailAlias = JHtml::_('email.cloak', $email.$domain);
+			}					
+		} 
+		return $emailAlias;
+	}
+	
+	protected static function getDomain () {
+		// SETTINGS FROM COMPONENT
+		$params = JComponentHelper::getParams( 'com_hbmanager' );
+		//echo __FILE__.' ('.__LINE__.')<pre>';print_r($params); echo'</pre>';
+		$emailDomain = $params->get( 'emaildomain' );
+		//echo __FILE__.' ('.__LINE__.')<pre>';print_r($emailDomain); echo'</pre>';
+		if (empty($emailDomain)) {
+			echo 'Error: no email domain set';
+		}
+		
+		return $emailDomain;
 	}
 }
 
